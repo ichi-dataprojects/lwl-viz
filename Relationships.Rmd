@@ -1,0 +1,345 @@
+---
+title: "Comparing relationships"
+description: |
+  The exposure time variable, which denotes how long the camera sensor remains active to capture images triggered by animal movement or heat signatures, is crucial in determining the quality and quantity of data collected by camera traps in wildlife research. This page uses the exposure time variable to showcase the relationship of animals through scatter plots, facilitating comparisons of the distribution of wild animals captured by camera traps.
+output: distill::distill_article
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+```{r}
+# Setting working directory and importing data 
+
+setwd("D:\\setebe\\Data science\\2024\\lwl-viz")
+
+# Read the CSV file
+l <- read.csv("liwale.csv", encoding = "UTF-8")
+attach(l)
+```
+
+```{r}
+# Importing libraries
+library(tidyverse)
+library(lubridate)
+library(grid)
+library(jpeg)
+library(magick)
+library(ggrepel)
+library(hms)
+```
+
+#### Visualizing Relationship of all species using exposure time variable
+
+*The goal is to compare the camera-captured appearances of all species, irrespective of their feeding behaviors, to explore their relationships.*
+
+```{r}
+
+# Convert ExposureTime to seconds
+l$ExposureTimeSeconds <- l$ExposureTime
+
+# Calculate average ExposureTime for each Species and Diet combination
+avg_exposure <- l %>%
+  group_by(Species, Diet) %>%
+  summarize(AvgExposureTimeSeconds = mean(ExposureTimeSeconds, na.rm = TRUE))
+
+# Create a scatter plot with linear regression line
+ggplot(avg_exposure, aes(x = reorder(Species, -AvgExposureTimeSeconds), y = AvgExposureTimeSeconds, color = Diet)) +
+  geom_point(size = 3) +
+  geom_smooth(method = "lm", se = FALSE, aes(group = 1), color = "black", linetype = "dashed") +
+  theme_minimal() +
+  theme(plot.title = element_text(color="black", size=12, 
+                                  face="bold",hjust=0),
+        plot.subtitle = element_text(color="black", size=9, 
+                                     face="bold.italic"),
+        plot.caption = element_text(size=10, color="black", 
+                                    face="italic",hjust=0.1),
+        axis.title.x = element_text(color="black", size=10, 
+                                    face="bold"),
+        axis.title.y = element_text(color="black", size=10, 
+                                    face="bold"),
+        axis.text.x = element_text(hjust= 1, 
+                                   vjust= 0.8, colour="black", 
+                                   size=rel(1.2),
+                                   angle = 45)) +
+
+labs(title = "Average Exposure Time of Species in Relation to Dietary Habits",
+     subtitle = "Negative relationship shows each species requires independent monitoring due to varied activity patterns.", 
+     caption = "Liwale camera trap data",
+     x = "Species",
+     y = "Average Exposure Time (seconds)") +
+  scale_color_brewer(palette = "Set1")
+
+
+```
+
+#### Visualizing Relationship of animals with the same diet using Original-date variable
+
+*Original date variable this variable indicate the exact date the picture was captured by the camera trap*
+
+##### Leopard vs Lion (Both canivorous)
+
+*The objective is to compare camera-captured appearances to investigate species' feeding behavior patterns.*
+```{r}
+
+# Convert DateOriginal to Date type
+l$Date <- as.Date(l$DateOriginal, format="%Y:%m:%d")
+
+# Filter observations for two specific species
+filtered_species <- l %>%
+  filter(Species %in% c("Leopard", "Lion"))
+
+# Count occurrences by date for the filtered species
+species_count <- filtered_species %>%
+  group_by(Date, Species) %>%
+  summarise(Count = n(), .groups = 'drop')
+
+# Identify highest, lowest, and middle values for each species
+label_points <- species_count %>%
+  group_by(Species) %>%
+  mutate(
+    max_count = max(Count),
+    min_count = min(Count),
+    mid_count = median(Count)
+  ) %>%
+  filter(
+    Count == max_count | 
+      Count == min_count | 
+      Count == mid_count
+  ) %>%
+  mutate(label_type = case_when(
+    Count == max_count ~ "Highest",
+    Count == min_count ~ "Lowest",
+    TRUE ~ "Median"
+  )) %>%
+  arrange(Species, desc(Count)) %>%
+  group_by(Species) %>%
+  slice(1, n(), n() %/% 2)  # Ensure only one label per type per species
+
+# Load and process the background image
+img_path <- "D:\\setebe\\Data science\\2024\\lwl-viz\\leli.jpg"
+img <- image_read(img_path)
+img_transparent <- image_modulate(img, brightness = 70) %>%
+  image_colorize(opacity = 50, color = "white")
+
+# Convert image to raster
+img_raster <- as.raster(img_transparent)
+
+# Create the scatter plot
+ggplot(species_count, aes(x = Date, y = Count, color = Species)) +
+  annotation_custom(rasterGrob(img_raster, width = unit(1,"npc"), height = unit(1,"npc")), 
+                    -Inf, Inf, -Inf, Inf) +
+  geom_point(size = 2, alpha = 0.7) + # Changed from geom_line to geom_point
+  geom_smooth(method = "lm", se = FALSE, linetype = "dashed") +  # Add regression lines
+  geom_point(data = label_points, size = 4, shape = 21, fill = "white") +  # Highlight labeled points
+  geom_label_repel(
+    data = label_points,
+    aes(label = paste(label_type, ":", Count)),
+    nudge_x = 30,
+    nudge_y = 5,
+    size = 3,
+    box.padding = 0.5,
+    point.padding = 0.5,
+    force = 10,
+    show.legend = FALSE
+  ) +
+  scale_color_manual(values = c("Leopard" = "#891818", 
+                                "Lion" = "#042E3D")) +
+  theme_minimal() +
+  labs(title = "Species Appearances Over Time",
+       subtitle = "Negative relationship despite all be hunting at night", 
+       caption = "Liwale camera trap data",
+       x = "Date",
+       y = "Number of Appearances") +
+  facet_wrap(~ Species, scales = "free_y") +
+  theme(
+    legend.position = "bottom",
+    plot.background = element_rect(fill = "white", color = NA),
+    panel.background = element_rect(fill = "transparent", color = NA),
+    panel.grid.major = element_line(color = "gray90"),
+    panel.grid.minor = element_line(color = "gray60"),
+    strip.background = element_rect(fill = "lightgray"),
+    strip.text = element_text(color = "black", face = "bold")
+  )
+
+
+
+```
+
+
+
+
+##### Elephant vs Buffalo (Both herbivorous)
+
+*The objective is to compare camera-captured appearances to investigate species' behavior patterns.*
+```{r}
+# Convert DateOriginal to Date type
+l$Date <- as.Date(l$DateOriginal, format="%Y:%m:%d")
+
+# Filter observations for two specific species
+filtered_species <- l %>%
+  filter(Species %in% c("Elephant", "Buffalo"))
+
+# Count occurrences by date for the filtered species
+species_count <- filtered_species %>%
+  group_by(Date, Species) %>%
+  summarise(Count = n(), .groups = 'drop')
+
+# Identify highest, lowest, and middle values for each species
+label_points <- species_count %>%
+  group_by(Species) %>%
+  mutate(
+    max_count = max(Count),
+    min_count = min(Count),
+    mid_count = median(Count)
+  ) %>%
+  filter(
+    Count == max_count | 
+      Count == min_count | 
+      Count == mid_count
+  ) %>%
+  mutate(label_type = case_when(
+    Count == max_count ~ "Highest",
+    Count == min_count ~ "Lowest",
+    TRUE ~ "Median"
+  )) %>%
+  arrange(Species, desc(Count)) %>%
+  group_by(Species) %>%
+  slice(1, n(), n() %/% 2)  # Ensure only one label per type per species
+
+# Load and process the background image
+img_path <- "D:\\setebe\\Data science\\2024\\lwl-viz\\elba.jpg"
+img <- image_read(img_path)
+img_transparent <- image_modulate(img, brightness = 70) %>%
+  image_colorize(opacity = 50, color = "white")
+
+# Convert image to raster
+img_raster <- as.raster(img_transparent)
+
+# Create the scatter plot
+ggplot(species_count, aes(x = Date, y = Count, color = Species)) +
+  annotation_custom(rasterGrob(img_raster, width = unit(1,"npc"), height = unit(1,"npc")), 
+                    -Inf, Inf, -Inf, Inf) +
+  geom_point(size = 2, alpha = 0.7) + # Changed from geom_line to geom_point
+  geom_smooth(method = "lm", se = FALSE, linetype = "dashed") +  # Add regression lines
+  geom_point(data = label_points, size = 4, shape = 21, fill = "white") +  # Highlight labeled points
+  geom_label_repel(
+    data = label_points,
+    aes(label = paste(label_type, ":", Count)),
+    nudge_x = 30,
+    nudge_y = 5,
+    size = 3,
+    box.padding = 0.5,
+    point.padding = 0.5,
+    force = 10,
+    show.legend = FALSE
+  ) +
+  scale_color_manual(values = c("Elephant" = "#891818", 
+                                "Buffalo" = "#042E3D")) +
+  theme_minimal() +
+  labs(title = "Species Appearances Over Time",
+       subtitle = "Negative relationship despite all be migrating animals", 
+       caption = "Liwale camera trap data",
+       x = "Date",
+       y = "Number of Appearances") +
+  facet_wrap(~ Species, scales = "free_y") +
+  theme(
+    legend.position = "bottom",
+    plot.background = element_rect(fill = "white", color = NA),
+    panel.background = element_rect(fill = "transparent", color = NA),
+    panel.grid.major = element_line(color = "gray90"),
+    panel.grid.minor = element_line(color = "gray60"),
+    strip.background = element_rect(fill = "lightgray"),
+    strip.text = element_text(color = "black", face = "bold")
+  )
+```
+
+
+
+
+##### Hippopotamus vs Lion (Herbivorous vs canivorous)
+
+*The focus here is on comparing the appearance captured by the camera to explore the relationship between species' nocturnal feeding behaviors.* 
+
+```{r}
+# Convert DateOriginal to Date type
+l$Date <- as.Date(l$DateOriginal, format="%Y:%m:%d")
+
+# Filter observations for two specific species
+filtered_species <- l %>%
+  filter(Species %in% c("Hippopotamus", "Lion"))
+
+# Count occurrences by date for the filtered species
+species_count <- filtered_species %>%
+  group_by(Date, Species) %>%
+  summarise(Count = n(), .groups = 'drop')
+
+# Identify highest, lowest, and middle values for each species
+label_points <- species_count %>%
+  group_by(Species) %>%
+  mutate(
+    max_count = max(Count),
+    min_count = min(Count),
+    mid_count = median(Count)
+  ) %>%
+  filter(
+    Count == max_count | 
+      Count == min_count | 
+      Count == mid_count
+  ) %>%
+  mutate(label_type = case_when(
+    Count == max_count ~ "Highest",
+    Count == min_count ~ "Lowest",
+    TRUE ~ "Median"
+  )) %>%
+  arrange(Species, desc(Count)) %>%
+  group_by(Species) %>%
+  slice(1, n(), n() %/% 2)  # Ensure only one label per type per species
+
+# Load and process the background image
+img_path <- "D:\\setebe\\Data science\\2024\\lwl-viz\\hili.jpg"
+img <- image_read(img_path)
+img_transparent <- image_modulate(img, brightness = 70) %>%
+  image_colorize(opacity = 50, color = "white")
+
+# Convert image to raster
+img_raster <- as.raster(img_transparent)
+
+# Create the scatter plot
+ggplot(species_count, aes(x = Date, y = Count, color = Species)) +
+  annotation_custom(rasterGrob(img_raster, width = unit(1,"npc"), height = unit(1,"npc")), 
+                    -Inf, Inf, -Inf, Inf) +
+  geom_point(size = 2, alpha = 0.7) + # Changed from geom_line to geom_point
+  geom_smooth(method = "lm", se = FALSE, linetype = "dashed") +  # Add regression lines
+  geom_point(data = label_points, size = 4, shape = 21, fill = "white") +  # Highlight labeled points
+  geom_label_repel(
+    data = label_points,
+    aes(label = paste(label_type, ":", Count)),
+    nudge_x = 30,
+    nudge_y = 5,
+    size = 3,
+    box.padding = 0.5,
+    point.padding = 0.5,
+    force = 10,
+    show.legend = FALSE
+  ) +
+  scale_color_manual(values = c("Hippopotamus" = "#891818", 
+                                "Lion" = "#042E3D")) +
+  theme_minimal() +
+  labs(title = "Species Appearances Over Time",
+       subtitle = "Negative relationship despite being active at night", 
+       caption = "Liwale camera trap data",
+       x = "Date",
+       y = "Number of Appearances") +
+  facet_wrap(~ Species, scales = "free_y") +
+  theme(
+    legend.position = "bottom",
+    plot.background = element_rect(fill = "white", color = NA),
+    panel.background = element_rect(fill = "transparent", color = NA),
+    panel.grid.major = element_line(color = "gray90"),
+    panel.grid.minor = element_line(color = "gray60"),
+    strip.background = element_rect(fill = "lightgray"),
+    strip.text = element_text(color = "black", face = "bold")
+  )
+```

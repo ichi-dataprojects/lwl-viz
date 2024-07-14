@@ -1,0 +1,19 @@
+---
+title: "Christmore Setebe"
+image: "chris.jpg"
+links:
+  - label: GitHub
+    url: 'https://github.com/ichi-dataprojects  target ="_blank"'
+  - label: Email
+    url: 'mailto:ichidataanalysis@email.com  target ="_blank"'
+output:
+  postcards::trestles
+site: distill::distill_website  
+---
+
+As a wildlife manager and data analyst, I am passionate about leveraging data to uncover compelling insights that enhance wildlife conservation efforts. In this project, I will analyze and visualize Liwale WMA census data from 2018 and 2019 to demonstrate how data-driven approaches can tell intuitive and impactful stories about wildlife. My objective is to illustrate the power of data analysis and visualization in informing conservation strategies, promoting sustainable wildlife management, and fostering a deeper understanding of wildlife dynamics.
+
+Make sure you click the top tool bars and scroll down and up in order to navigate to all visualizations pages 
+
+I HOPE YOU ENJOY THE VENTURE 
+

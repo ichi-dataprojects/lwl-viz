@@ -1,0 +1,227 @@
+---
+title: "Distibution comparison"
+description: |
+  The exposure time variable, representing the duration the camera sensor is active to capture images triggered by animal movement or heat, is vital for assessing the quality and quantity of data from camera traps in wildlife research. This page utilizes the exposure time variable to illustrate the distribution of animals through bar plots, aiding in comparisons of wild animals captured by camera traps.
+output: distill::distill_article
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+```{r}
+# Setting working directory and importing data 
+
+setwd("D:\\setebe\\Data science\\2024\\lwl-viz")
+
+# Read the CSV file
+l <- read.csv("liwale.csv", encoding = "UTF-8")
+attach(l)
+```
+
+```{r}
+# Importing libralies 
+library(tidyverse)
+library(lubridate)
+library(grid)
+library(jpeg)
+library(magick)
+library(ggrepel)
+library(hms)
+```
+
+##### Oribi is the most exposed animal
+
+```{r}
+# Calculate average ExposureTime for each species
+avg_exposure <- l %>%
+  group_by(Species) %>%
+  summarize(AvgExposureTime = mean(ExposureTime, na.rm = TRUE))
+
+# Create a bar plot with labels
+ggplot(avg_exposure, aes(x = reorder(Species, -AvgExposureTime), y = AvgExposureTime)) +
+  geom_bar(stat = "identity", fill = "skyblue") +
+  geom_text(aes(label = round(AvgExposureTime, 4)), vjust = -0.5, size = 3) +
+  theme_minimal() +
+  theme(plot.title = element_text(color="black", size=12, 
+                                  face="bold",hjust=0),
+        plot.subtitle = element_text(color="black", size=10, 
+                                     face="bold.italic"),
+        plot.caption = element_text(size=10, color="black", 
+                                    face="italic",hjust=0.1),
+        axis.title.x = element_text(color="black", size=10, 
+                                    face="bold"),
+        axis.title.y = element_text(color="black", size=10, 
+                                    face="bold"),
+        axis.text.x = element_text(hjust= 1, 
+                                   vjust= 0.8, colour="black", 
+                                   size=rel(1.2),
+                                   angle = 45)) +
+
+labs(title = "Average Exposure Time by Species",
+    subtitle = "Oribis are cautious antelopes, yet their exposure time is longer than that of other animals.", 
+    caption = "Liwale camera trap data",
+    x = "Species",
+    y = "Average Exposure Time (seconds)") +
+  annotate("text", x=11, y=0.04, label="easily frightened,often reacting with sudden movements") +
+  annotate("rect", xmin=1, xmax=1.3, ymin=0.00, ymax=0.05, alpha=.9,
+           fill="red")
+
+```
+
+##### Visualizing wild animals camera trap Exposed time by diet
+
+```{r}
+# Calculate average ExposureTime for each Species and Diet combination
+avg_exposure <- l %>%
+  group_by(Species, Diet) %>%
+  summarize(AvgExposureTime = mean(ExposureTime, na.rm = TRUE))
+
+# Create a bar plot with labels
+ggplot(avg_exposure, aes(x = reorder(Species, -AvgExposureTime), y = AvgExposureTime, fill = Diet)) +
+  geom_bar(stat = "identity", position = "dodge") +
+  geom_text(aes(label = round(AvgExposureTime, 4)), 
+            position = position_dodge(width = 0.9), 
+            vjust = -0.5, size = 3) +
+  theme_minimal() +
+  theme(plot.title = element_text(color="black", size=12, 
+                                                  face="bold",hjust=0),
+                        plot.subtitle = element_text(color="black", size=10, 
+                                                     face="bold.italic"),
+                        plot.caption = element_text(size=10, color="black", 
+                                                    face="italic",hjust=0.1),
+                        axis.title.x = element_text(color="black", size=10, 
+                                                    face="bold"),
+                        axis.title.y = element_text(color="black", size=10, 
+                                                    face="bold"),
+                        axis.text.x = element_text(hjust= 1, 
+                                                   vjust= 0.8, colour="black", 
+                                                   size=rel(1.2),
+                                                   angle = 45)) +
+  labs(title = "Average Exposure Time by Species",
+       subtitle = "Camera trap exposure visualization aids in monitoring, studying wild populations, supporting conservation and ecological research.", 
+       caption = "Liwale camera trap data",
+       x = "Species",
+       y = "Average Exposure Time (seconds)") +
+  annotate("text", x=11, y=0.04, label="In the wild, hyenas, lions, and leopards curiously engage camera traps.") +
+  annotate("rect", xmin=1, xmax=1.3, ymin=0.00, ymax=0.05, alpha=.9,
+           fill="red") +
+  scale_fill_brewer(palette = "Set3")
+
+```
+
+##### Comparing exposure Time of the Afican Big five wild animals
+
+#### Elephant and Buffalo (Herbivorous animals)
+
+```{r}
+# Filter for Elephant and Buffalo
+filtered_data <- l %>%
+  filter(Species %in% c("Elephant", "Buffalo"))
+
+# Create a bar plot
+ggplot(filtered_data, aes(x = Species, 
+                          y = ExposureTime, fill = Species)) +
+  geom_bar(stat = "summary", fun = "mean", 
+           position = position_dodge(width = 0.7), alpha = 0.7) +
+  theme_minimal() +
+  theme(plot.title = element_text(color="black", size=12, 
+                                  face="bold",hjust=0),
+        plot.subtitle = element_text(color="black", size=10, 
+                                     face="bold.italic"),
+        plot.caption = element_text(size=10, color="black", 
+                                    face="italic",hjust=0.1),
+        axis.title.x = element_text(color="black", size=10, 
+                                    face="bold"),
+        axis.title.y = element_text(color="black", size=10, 
+                                    face="bold"),
+        axis.text.x = element_text(hjust= 1, 
+                                   vjust= 0.8, colour="black", 
+                                   size=rel(1.2)),legend.position = "bottom")+
+  labs(title = "Average Exposure Time by Species",
+       subtitle = "Visual shows buffalo and elephants synchronized movements, revealing adaptive strategies.", 
+       caption = "Liwale camera trap data",
+       x = "Species",
+       y = "Average Exposure Time (seconds)") +
+  scale_fill_manual(values = c("Elephant" = "#1b9e77", "Buffalo" = "#d95f02"))  +
+  annotate("text", x=1, y=0.010, label="herds move in harmony") +
+  annotate("text", x=2, y=0.010, label="navigate deliberately")
+
+
+```
+
+#### Lion vs Leopard (Canivorous animals)
+
+```{r}
+# Filter for Lion and Leopard
+filtered_data <- l %>%
+  filter(Species %in% c("Lion", "Leopard"))
+
+# Create a bar plot
+ggplot(filtered_data, aes(x = Species, 
+                          y = ExposureTime, fill = Species)) +
+  geom_bar(stat = "summary", fun = "mean", 
+           position = position_dodge(width = 0.7), alpha = 0.7) +
+  theme_minimal() +
+  labs(title = "Average Exposure Time by Species",
+       subtitle = "The visual highlights lions moving in prides,contrasted with solitary leopards.", 
+       caption = "Liwale camera trap data",
+       x = "Species",
+       y = "Average Exposure Time (seconds)") +
+  scale_fill_manual(values = c("Lion" = "#1b9e77", "Leopard" = "#d95f02")) +
+  theme(plot.title = element_text(color="black", size=12, 
+                                  face="bold",hjust=0),
+        plot.subtitle = element_text(color="black", size=10, 
+                                     face="bold.italic"),
+        plot.caption = element_text(size=10, color="black", 
+                                    face="italic",hjust=0.1),
+        axis.title.x = element_text(color="black", size=10, 
+                                    face="bold"),
+        axis.title.y = element_text(color="black", size=10, 
+                                    face="bold"),
+        axis.text.x = element_text(hjust= 1, 
+                                   vjust= 0.8, colour="black", 
+                                   size=rel(1.2)),legend.position = "bottom") +
+  annotate("text", x=1, y=0.020, label="stealth & ambush prey") +
+  annotate("text", x=2, y=0.020, label="coordinated teamwork")
+
+
+```
+
+#### Hippopotamus vs Elephant (Herbivorous animals)
+
+```{r}
+# Filter for Elephant and Hippopotamus
+filtered_data <- l %>%
+  filter(Species %in% c("Hippopotamus", "Elephant"))
+
+# Create a bar plot
+ggplot(filtered_data, aes(x = Species, 
+                          y = ExposureTime, fill = Species)) +
+  geom_bar(stat = "summary", fun = "mean", 
+           position = position_dodge(width = 0.7), alpha = 0.7) +
+  theme_minimal() +
+  labs(title = "Average Exposure Time by Species",
+       subtitle = "Hippopotamuses exhibit slow movement on land, whereas elephants display distinctive walking patterns and agility.", 
+       caption = "Liwale camera trap data",
+       x = "Species",
+       y = "Average Exposure Time (seconds)") +
+  scale_fill_manual(values = c("Hippopotamus" = "#1b9e77", "Elephant" = "#d95f02")) +
+  theme(plot.title = element_text(color="black", size=12, 
+                                  face="bold",hjust=0),
+        plot.subtitle = element_text(color="black", size=10, 
+                                     face="bold.italic"),
+        plot.caption = element_text(size=10, color="black", 
+                                    face="italic",hjust=0.1),
+        axis.title.x = element_text(color="black", size=10, 
+                                    face="bold"),
+        axis.title.y = element_text(color="black", size=10, 
+                                    face="bold"),
+        axis.text.x = element_text(hjust= 1, 
+                                   vjust= 0.8, colour="black", 
+                                   size=rel(1.2)),legend.position = "bottom") +
+  annotate("text", x=1, y=0.010, label="terrestrial animals") +
+  annotate("text", x=2, y=0.020, label="semi-aquatic animals")
+
+
+```

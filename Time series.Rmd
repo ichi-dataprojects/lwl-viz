@@ -1,0 +1,214 @@
+---
+title: "Time series analysis "
+description: |
+  This page utilizes the date-time variable to display the appearance patterns of animals through line plots, enabling comparisons of the distribution of wild animals captured by camera traps.
+output: distill::distill_article
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+
+
+```{r}
+# Setting working directory and importing data 
+
+setwd("D:\\setebe\\Data science\\2024\\lwl-viz")
+
+# Read the CSV file
+l <- read.csv("liwale.csv", encoding = "UTF-8")
+attach(l)
+```
+
+
+
+```{r}
+
+# Importing libralies 
+library(tidyverse)
+library(lubridate)
+library(grid)
+library(jpeg)
+library(magick)
+library(ggrepel)
+library(hms)
+```
+
+
+
+#### comparing appearence of species 
+
+#####  Buffalo vs Zebra 
+*The objective is to compare camera-captured appearances to investigate number of species*
+```{r}
+
+# Convert DateOriginal to Date type
+l$Date <- as.Date(l$DateOriginal, format="%Y:%m:%d")
+
+# Filter observations for two specific species
+filtered_species <- l %>%
+  filter(Species %in% c("Buffalo", "Zebra"))
+
+# Count occurrences by date for the filtered species
+species_count <- filtered_species %>%
+  group_by(Date, Species) %>%
+  summarise(Count = n(), .groups = 'drop')
+
+# Identify highest, lowest, and middle values for each species
+label_points <- species_count %>%
+  group_by(Species) %>%
+  mutate(
+    max_count = max(Count),
+    min_count = min(Count),
+    mid_count = median(Count)
+  ) %>%
+  filter(
+    Count == max_count | 
+      Count == min_count | 
+      Count == mid_count
+  ) %>%
+  mutate(label_type = case_when(
+    Count == max_count ~ "Highest",
+    Count == min_count ~ "Lowest",
+    TRUE ~ "Median"
+  )) %>%
+  arrange(Species, desc(Count)) %>%
+  group_by(Species) %>%
+  slice(1, n(), n() %/% 2)  # Ensure only one label per type per species
+
+# Load and process the background image
+img_path <- "D:\\setebe\\Data science\\2024\\lwl-viz\\zz.jpg"
+img <- image_read(img_path)
+img_transparent <- image_modulate(img, brightness = 70) %>%
+  image_colorize(opacity = 50, color = "white")
+
+# Convert image to raster
+img_raster <- as.raster(img_transparent)
+
+# Create the plot
+ggplot(species_count, aes(x = Date, y = Count, color = Species)) +
+  annotation_custom(rasterGrob(img_raster, width = unit(1,"npc"), height = unit(1,"npc")), 
+                    -Inf, Inf, -Inf, Inf) +
+  geom_line(size = 1) +
+  geom_point(data = label_points, size = 3) +
+  geom_label_repel(
+    data = label_points,
+    aes(label = paste(label_type, ":", Count)),
+    nudge_x = 30,
+    nudge_y = 5,
+    size = 3,
+    box.padding = 0.5,
+    point.padding = 0.5,
+    force = 10,
+    show.legend = FALSE
+  ) +
+  scale_color_manual(values = c("Buffalo" = "#891818", "Zebra" = "#042E3D")) +
+  theme_minimal() +
+  labs(title = "Species Appearances Over Time",
+       subtitle = "Over time, the Zebra consistently stands out as the most frequently captured species", 
+       caption = "Liwale camera trap data",
+       x = "Date",
+       y = "Number of Appearances") +
+  facet_wrap(~ Species, scales = "free_y") +
+  theme(
+    legend.position = "bottom",
+    plot.background = element_rect(fill = "white", color = NA),
+    panel.background = element_rect(fill = "transparent", color = NA),
+    panel.grid.major = element_line(color = "gray90"),
+    panel.grid.minor = element_line(color = "gray60"),
+    strip.background = element_rect(fill = "lightgray"),
+    strip.text = element_text(color = "black", face = "bold")
+  )
+
+
+```
+
+
+
+##### Leopard vs Impala 
+*The objective is to compare camera-captured appearances to investigate species who tend to be near trees*
+```{r}
+
+# Convert DateOriginal to Date type
+l$Date <- as.Date(l$DateOriginal, format="%Y:%m:%d")
+
+# Filter observations for two specific species
+filtered_species <- l %>%
+  filter(Species %in% c("Leopard", "Impala"))
+
+# Count occurrences by date for the filtered species
+species_count <- filtered_species %>%
+  group_by(Date, Species) %>%
+  summarise(Count = n(), .groups = 'drop')
+
+# Identify highest, lowest, and middle values for each species
+label_points <- species_count %>%
+  group_by(Species) %>%
+  mutate(
+    max_count = max(Count),
+    min_count = min(Count),
+    mid_count = median(Count)
+  ) %>%
+  filter(
+    Count == max_count | 
+      Count == min_count | 
+      Count == mid_count
+  ) %>%
+  mutate(label_type = case_when(
+    Count == max_count ~ "Highest",
+    Count == min_count ~ "Lowest",
+    TRUE ~ "Median"
+  )) %>%
+  arrange(Species, desc(Count)) %>%
+  group_by(Species) %>%
+  slice(1, n(), n() %/% 2)  # Ensure only one label per type per species
+
+# Load and process the background image
+img_path <- "D:\\setebe\\Data science\\2024\\rise job app potfolio\\li.jpg"
+img <- image_read(img_path)
+img_transparent <- image_modulate(img, brightness = 70) %>%
+  image_colorize(opacity = 50, color = "white")
+
+# Convert image to raster
+img_raster <- as.raster(img_transparent)
+
+# Create the plot
+ggplot(species_count, aes(x = Date, y = Count, color = Species)) +
+  annotation_custom(rasterGrob(img_raster, width = unit(1,"npc"), height = unit(1,"npc")), 
+                    -Inf, Inf, -Inf, Inf) +
+  geom_line(size = 1) +
+  geom_point(data = label_points, size = 3) +
+  geom_label_repel(
+    data = label_points,
+    aes(label = paste(label_type, ":", Count)),
+    nudge_x = 30,
+    nudge_y = 5,
+    size = 3,
+    box.padding = 0.5,
+    point.padding = 0.5,
+    force = 10,
+    show.legend = FALSE
+  ) +
+  scale_color_manual(values = c("Leopard" = "#891818", 
+                                "Impala" = "#042E3D")) +
+  theme_minimal() +
+  labs(title = "Species Appearances Over Time",
+       subtitle = "Impalas meet leopards near trees, but leopards are less frequently captured in visuals.", 
+       caption = "Liwale camera trap data",
+       x = "Date",
+       y = "Number of Appearances") +
+  facet_wrap(~ Species, scales = "free_y") +
+  theme(
+    legend.position = "bottom",
+    plot.background = element_rect(fill = "white", color = NA),
+    panel.background = element_rect(fill = "transparent", color = NA),
+    panel.grid.major = element_line(color = "gray90"),
+    panel.grid.minor = element_line(color = "gray60"),
+    strip.background = element_rect(fill = "lightgray"),
+    strip.text = element_text(color = "black", face = "bold")
+  )
+
+
+```
+

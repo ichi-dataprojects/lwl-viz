@@ -1,0 +1,17 @@
+name: "."
+title: "Wildlife camera trap data visualization"
+description: |
+  Wildlife camera trap data visualization
+output_dir: "docs"
+theme: chris-theme.css
+navbar:
+  right:
+    - text: "Home"
+      href: index.html
+    - text: "Distribution"
+      href: Distribution.html
+    - text: "Relationships"
+      href: Relationships.html  
+    - text: "Time-series"
+      href: Time-series.html  
+output: distill::distill_article

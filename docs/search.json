@@ -1,0 +1,36 @@
+{
+  "articles": [
+    {
+      "path": "about.knit.html",
+      "title": "About this site",
+      "description": "Some additional details about the website",
+      "author": [],
+      "contents": "\r\n\r\n\r\n\r\n",
+      "last_modified": "2024-07-14T16:50:52+03:00"
+    },
+    {
+      "path": "Distribution.html",
+      "title": "Distibution comparison",
+      "description": "The exposure time variable, representing the duration the camera sensor is active to capture images triggered by animal movement or heat, is vital for assessing the quality and quantity of data from camera traps in wildlife research. This page utilizes the exposure time variable to illustrate the distribution of animals through bar plots, aiding in comparisons of wild animals captured by camera traps.\n",
+      "author": [],
+      "contents": "\r\n\r\n\r\n\r\n\r\n\r\n\r\nOribi is the most exposed animal\r\n\r\n\r\n\r\nVisualizing wild animals camera trap Exposed time by diet\r\n\r\n\r\n\r\nComparing exposure Time of the Afican Big five wild animals\r\nElephant and Buffalo (Herbivorous animals)\r\n\r\n\r\n\r\nLion vs Leopard (Canivorous animals)\r\n\r\n\r\n\r\nHippopotamus vs Elephant (Herbivorous animals)\r\n\r\n\r\n\r\n\r\n\r\n\r\n",
+      "last_modified": "2024-07-14T16:51:08+03:00"
+    },
+    {
+      "path": "index.html",
+      "title": "Christmore Setebe",
+      "author": [],
+      "contents": "\r\n\r\n          \r\n          \r\n          Wildlife camera trap data visualization\r\n          \r\n          \r\n          Home\r\n          Distribution\r\n          Relationships\r\n          Time-series\r\n          ☰\r\n          \r\n          \r\n      \r\n        \r\n          \r\n            \r\n              \r\n            \r\n              Christmore Setebe\r\n            \r\n            \r\n              \r\n                \r\n                    \r\n                      \r\n                        GitHub\r\n                      \r\n                    \r\n                  \r\n                                    \r\n                    \r\n                      \r\n                        Email\r\n                      \r\n                    \r\n                  \r\n                                  \r\n            \r\n          \r\n        \r\n        \r\n        \r\n          \r\n            As a wildlife manager and data analyst, I am passionate\r\n            about leveraging data to uncover compelling insights that\r\n            enhance wildlife conservation efforts. In this project, I\r\n            will analyze and visualize Liwale WMA census data from 2018\r\n            and 2019 to demonstrate how data-driven approaches can tell\r\n            intuitive and impactful stories about wildlife. My objective\r\n            is to illustrate the power of data analysis and\r\n            visualization in informing conservation strategies,\r\n            promoting sustainable wildlife management, and fostering a\r\n            deeper understanding of wildlife dynamics.\r\n            Make sure you click the top tool bars and scroll down and\r\n            up in order to navigate to all visualizations pages\r\n            I HOPE YOU ENJOY THE VENTURE\r\n          \r\n        \r\n      \r\n    \r\n\r\n    \r\n      \r\n        \r\n          \r\n            \r\n              \r\n            \r\n              Christmore Setebe\r\n            \r\n            \r\n              \r\n                \r\n                                    \r\n                    \r\n                      GitHub\r\n                    \r\n                  \r\n                                    \r\n                    \r\n                      Email\r\n                    \r\n                  \r\n                                  \r\n              \r\n            \r\n            \r\n              As a wildlife manager and data analyst, I am passionate\r\n              about leveraging data to uncover compelling insights that\r\n              enhance wildlife conservation efforts. In this project, I\r\n              will analyze and visualize Liwale WMA census data from\r\n              2018 and 2019 to demonstrate how data-driven approaches\r\n              can tell intuitive and impactful stories about wildlife.\r\n              My objective is to illustrate the power of data analysis\r\n              and visualization in informing conservation strategies,\r\n              promoting sustainable wildlife management, and fostering a\r\n              deeper understanding of wildlife dynamics.\r\n              Make sure you click the top tool bars and scroll down\r\n              and up in order to navigate to all visualizations\r\n              pages\r\n              I HOPE YOU ENJOY THE VENTURE\r\n            \r\n        \r\n      \r\n    \r\n\r\n    \r\n    \r\n    ",
+      "last_modified": "2024-07-14T16:51:17+03:00"
+    },
+    {
+      "path": "Relationships.html",
+      "title": "Comparing relationships",
+      "description": "The exposure time variable, which denotes how long the camera sensor remains active to capture images triggered by animal movement or heat signatures, is crucial in determining the quality and quantity of data collected by camera traps in wildlife research. This page uses the exposure time variable to showcase the relationship of animals through scatter plots, facilitating comparisons of the distribution of wild animals captured by camera traps.\n",
+      "author": [],
+      "contents": "\r\n\r\n\r\n\r\n\r\n\r\n\r\nVisualizing Relationship of all species using exposure time variable\r\nThe goal is to compare the camera-captured appearances of all species, irrespective of their feeding behaviors, to explore their relationships.\r\n\r\n\r\n\r\nVisualizing Relationship of animals with the same diet using Original-date variable\r\nOriginal date variable this variable indicate the exact date the picture was captured by the camera trap\r\nLeopard vs Lion (Both canivorous)\r\nThe objective is to compare camera-captured appearances to investigate species’ feeding behavior patterns.\r\n\r\n\r\n\r\nElephant vs Buffalo (Both herbivorous)\r\nThe objective is to compare camera-captured appearances to investigate species’ behavior patterns.\r\n\r\n\r\n\r\nHippopotamus vs Lion (Herbivorous vs canivorous)\r\nThe focus here is on comparing the appearance captured by the camera to explore the relationship between species’ nocturnal feeding behaviors.\r\n\r\n\r\n\r\n\r\n\r\n\r\n",
+      "last_modified": "2024-07-14T16:51:34+03:00"
+    }
+  ],
+  "collections": []
+}
